@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "state.h"
+#include "tree.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,13 +27,14 @@ private slots:
     void startGame();
     void updateState();
     void updateIndex();
-    void winnerFound();
+    void gameOver();
     void actionRemove();
     void indexLeft();
     void indexRight();
     void actionDivide();
     void setLength(int);
     void changePlayer();
+    void computerMove();
 
 private:
     Ui::MainWindow *ui;
@@ -41,5 +43,10 @@ private:
     vector<int> numbers;
     State state;
     int firstPlayer, algorithmType, length;
+
+    struct {
+        int points, bank;
+        vector<int> numbers;
+    } shownState;
 };
 #endif // MAINWINDOW_H

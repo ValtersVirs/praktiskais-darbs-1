@@ -38,18 +38,28 @@ void MainWindow::initializeSettings() {
 }
 
 void MainWindow::startGame() {
-    state = State(length);
+    shownState.bank = 0;
+    shownState.points = 0;
+    //shownState.numbers = { 3, 2, 1, 4 };
+
+    srand(time(0));
+    for (int i = 0; i < length; i++) {
+        shownState.numbers.push_back(rand() % 4 + 1);
+    }
+
+    state = State(shownState.numbers);
 
     curIndex = 0;
 
     if (ui->radioUser->isChecked()) {
         firstPlayer = 1;
+        ui->lblCurrentPlayer->setText(QString("Lietotājs"));
     } else {
         firstPlayer = 2;
+        ui->lblCurrentPlayer->setText(QString("Dators"));
     }
-    // todo: curPlayer = lietotājs vai dators
-    curPlayer = 1;
-    ui->lblCurrentPlayer->setText(QString("Spēlētājs ").append(QString::number(curPlayer)));
+
+    curPlayer = firstPlayer;
 
     if (ui->radioMinimax->isChecked()) {
         algorithmType = 1;
@@ -73,45 +83,43 @@ void MainWindow::updateState() {
     ui->lblPointsNum->setText(QString::number(state.getPoints()));
     ui->lblBankNum->setText(QString::number(state.getBank()));
 
-    if (state.isEmpty()) {
-        winnerFound();
+    if (state.hasFinished()) {
+        gameOver();
     }
 
-    if (curIndex >= state.getNumbers().size()) {
-        curIndex = state.getNumbers().size() - 1;
+    if (curIndex >= shownState.numbers.size()) {
+        curIndex = shownState.numbers.size() - 1;
     }
-
-
 
     updateIndex();
 }
 
 void MainWindow::updateIndex() {
-    if (state.isEmpty()) {
+    if (state.hasFinished()) {
         ui->lblNumbers->setText("");
         return;
     }
 
     QString numberString;
-    for (int i = 0; i < state.getNumbers().size(); ++i) {
+    for (int i = 0; i < shownState.numbers.size(); ++i) {
         if (curIndex == i) {
             numberString += "<font color='red'>";
-            numberString += QString::number(state.getNumber(i));
+            numberString += QString::number(shownState.numbers[i]);
             numberString += "</font>";
         } else {
-            numberString += QString::number(state.getNumber(i));
+            numberString += QString::number(shownState.numbers[i]);
         }
     }
     ui->lblNumbers->setText(numberString);
 
-    if (state.getNumber(curIndex) == 2 || state.getNumber(curIndex) == 4) {
+    if (shownState.numbers[curIndex] == 2 || shownState.numbers[curIndex] == 4) {
         ui->btnDivide->setDisabled(false);
     } else {
         ui->btnDivide->setDisabled(true);
     }
 }
 
-void MainWindow::winnerFound() {
+void MainWindow::gameOver() {
     ui->btnRemove->setVisible(false);
     ui->btnDivide->setVisible(false);
     ui->btnLeft->setVisible(false);
@@ -119,11 +127,20 @@ void MainWindow::winnerFound() {
     ui->btnNewGame->setVisible(true);
     ui->lblCurrentPlayer->setVisible(false);
 
-    // to do player 1, player 2 -> user, computer
-    if (!(state.getPoints() % 2) && !(state.getBank() % 2)) {
-        ui->lblWinner->setText("Spēlētājs 1 uzvarēja");
-    } else if ((state.getPoints() % 2) && (state.getBank() % 2)) {
-        ui->lblWinner->setText("Spēlētājs 2 uzvarēja");
+    int winner = state.getWinner();
+
+    if (winner == 1) {
+        if (firstPlayer == 1) {
+            ui->lblWinner->setText("Uzvarēja lietotājs");
+        } else {
+            ui->lblWinner->setText("Uzvarēja dators");
+        }
+    } else if (winner == 2) {
+        if (firstPlayer == 1) {
+            ui->lblWinner->setText("Uzvarēja dators");
+        } else {
+            ui->lblWinner->setText("Uzvarēja lietotājs");
+        }
     } else {
         ui->lblWinner->setText("Neizšķirts");
     }
@@ -131,38 +148,70 @@ void MainWindow::winnerFound() {
     ui->lblWinner->setVisible(true);
 }
 
-void MainWindow::actionRemove()
-{
-    if (state.isEmpty()) return;
+void MainWindow::actionRemove() {
+    if (state.hasFinished()) return;
 
-    state.doAction(curIndex, false);
+    int number = shownState.numbers[curIndex];
+    shownState.numbers.erase(shownState.numbers.begin() + curIndex);
 
-    changePlayer();
-    updateState();
-}
+    state.doAction(number, false);
 
-void MainWindow::actionDivide()
-{
-    if (state.isEmpty()) return;
-    if (!(state.getNumber(curIndex) == 2 || state.getNumber(curIndex) == 4)) return;
-
-    state.doAction(curIndex, true);
+    shownState.points = state.getPoints();
 
     changePlayer();
     updateState();
+    //computerMove();
 }
 
-void MainWindow::indexLeft()
-{
+void MainWindow::actionDivide() {
+    if (state.hasFinished()) return;
+
+    int number = shownState.numbers[curIndex];
+
+    if (number == 2) {
+        shownState.numbers.insert(shownState.numbers.begin() + curIndex, 2, 1);
+        shownState.numbers.erase(shownState.numbers.begin() + curIndex + 2);
+    } else if (number == 4) {
+        shownState.numbers.insert(shownState.numbers.begin() + curIndex, 2, 2);
+        shownState.numbers.erase(shownState.numbers.begin() + curIndex + 2);
+    } else {
+        return;
+    }
+
+    state.doAction(number, true);
+
+    shownState.points = state.getPoints();
+    shownState.bank = state.getBank();
+
+    changePlayer();
+    updateState();
+    //computerMove();
+}
+
+void MainWindow::computerMove() {
+    Tree tree(state);
+
+    clock_t start = clock();
+
+    tree.generateTree();
+
+    clock_t end = clock();
+    double duration = double(end - start) / CLOCKS_PER_SEC;
+
+    //qDebug() << "Tree generated " << duration;
+
+    updateState();
+}
+
+void MainWindow::indexLeft() {
     if (curIndex > 0) {
         curIndex--;
     }
     updateIndex();
 }
 
-void MainWindow::indexRight()
-{
-    if (curIndex < state.getNumbers().size() - 1) {
+void MainWindow::indexRight() {
+    if (curIndex < shownState.numbers.size() - 1) {
         curIndex++;
     }
     updateIndex();
@@ -178,7 +227,13 @@ void MainWindow::setLength(int value) {
 void MainWindow::changePlayer() {
     curPlayer = curPlayer == 1 ? 2 : 1;
 
-    ui->lblCurrentPlayer->setText(QString("Spēlētājs ").append(QString::number(curPlayer)));
+    if (curPlayer == 1) {
+        ui->lblCurrentPlayer->setText(QString("Lietotājs"));
+    } else {
+        ui->lblCurrentPlayer->setText(QString("Dators"));
+    }
+
+    //ui->lblCurrentPlayer->setText(QString("Spēlētājs ").append(QString::number(curPlayer)));
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {

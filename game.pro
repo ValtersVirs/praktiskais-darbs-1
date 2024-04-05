@@ -14,7 +14,8 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    state.h
+    state.h \
+    tree.h
 
 FORMS += \
     mainwindow.ui
