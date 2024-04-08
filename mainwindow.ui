@@ -30,7 +30,7 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="pageStart">
        <widget class="QGroupBox" name="groupPlayer">
@@ -278,7 +278,7 @@
          </rect>
         </property>
         <property name="text">
-         <string>Koka dziļums (1-10)</string>
+         <string>Koka dziļums (1-20)</string>
         </property>
        </widget>
        <widget class="QSpinBox" name="spnDepth">
@@ -303,7 +303,7 @@
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>10</number>
+         <number>20</number>
         </property>
         <property name="value">
          <number>7</number>
