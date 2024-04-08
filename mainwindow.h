@@ -26,7 +26,6 @@ private slots:
     void initializeSettings();
     void startGame();
     void updateState();
-    void updateIndex();
     void gameOver();
     void actionRemove();
     void indexLeft();
@@ -35,11 +34,13 @@ private slots:
     void setLength(int);
     void changePlayer();
     void computerMove();
+    void computerState(int, bool);
 
 private:
     Ui::MainWindow *ui;
+    QThread *treeThread;
 
-    int points, curIndex, curPlayer;
+    int points, curIndex, curPlayer, depth, totalNodeCount;
     vector<int> numbers;
     State state;
     int firstPlayer, algorithmType, length;

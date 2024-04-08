@@ -13,7 +13,9 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
+    alfabeta.h \
     mainwindow.h \
+    minimax.h \
     state.h \
     tree.h
 

@@ -9,7 +9,7 @@ using namespace std;
 class State {
 private:
     int points, bank;
-    map<int, int> numbers;
+    map<int, int> numbers;  // map of numbers, key = number, value = count
 
 public:
 
@@ -21,6 +21,11 @@ public:
     }
 
     State(vector<int> numbers) : points(0), bank(0) {
+        this->numbers[1] = 0;
+        this->numbers[2] = 0;
+        this->numbers[3] = 0;
+        this->numbers[4] = 0;
+
         for (int number : numbers) {
             if (number >= 1 && number <= 4)
                 this->numbers[number]++;
@@ -29,7 +34,12 @@ public:
 
     State(int length) : points(0), bank(0) {
         int number;
-        // random row of [1;4]
+        numbers[1] = 0;
+        numbers[2] = 0;
+        numbers[3] = 0;
+        numbers[4] = 0;
+
+        // random numbers in range [1;4]
         srand(time(0));
         for (int i = 0; i < length; i++) {
             number = rand() % 4 + 1;
@@ -64,12 +74,80 @@ public:
         }
     }
 
+    // returns states heuristic functions value
+    // higher value is better
+    int heuristicValue() {
+        int value = 0;  // default value
+
+        // is game winnable
+        bool isWinnable =
+            (isEven(points) && isEven(numbers[1] + numbers[3])) ||
+            (!isEven(points) && !isEven(numbers[1] + numbers[3]));
+
+        if (hasFinished()) {
+            if (isWinnable) {
+                // win state
+                if (isEven(points) && isEven(bank))
+                    return 10;
+
+                // draw state
+                if ((isEven(points) && !isEven(bank)) ||
+                    (!isEven(points) && isEven(bank)))
+                    return -10;
+            }
+            else {
+                // draw state
+                if ((isEven(points) && !isEven(bank)) ||
+                    (!isEven(points) && isEven(bank)))
+                    return 10;
+
+                // loss state
+                if (!isEven(points) && !isEven(bank))
+                    return -10;
+            }
+        }
+
+        // guranteed favorable outcome (win/draw)
+        if (isEven(bank) && (numbers[2] + numbers[4]) == 0)
+            return 9;
+
+        // guranteed unfavorable outcome (draw/loss)
+        if (!isEven(bank) && (numbers[2] + numbers[4]) == 0)
+            return -9;
+
+        // possible to force a favorable outcome (win/draw)
+        if ((numbers[2] + numbers[4]) == 2)
+            return 8;
+
+        // possible for opponent to force an unfavorable outcome (draw/loss)
+        if ((numbers[2] + numbers[4]) == 1)
+            return -8;
+
+        if (isWinnable) {
+            // try to have even points and bank
+            if (isEven(points) && isEven(bank))
+                return 1;
+        }
+        else {
+            // try to have odd points and bank
+            if ((isEven(points) && !isEven(bank)) ||
+                (!isEven(points) && isEven(bank)))
+                return 1;
+        }
+
+        return value;
+    }
+
+    bool isEven(int number) {
+        return !(number % 2);
+    }
+
     /*
     returns winner
     1 = player 1
     2 = player 2
     3 = draw
-    0 = game hasn't finished
+    0 = game isn't finished
     */
     int getWinner() {
         if (!this->hasFinished()) return 0;

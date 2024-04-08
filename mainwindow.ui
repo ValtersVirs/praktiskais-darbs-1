@@ -37,7 +37,7 @@
         <property name="geometry">
          <rect>
           <x>130</x>
-          <y>50</y>
+          <y>20</y>
           <width>241</width>
           <height>71</height>
          </rect>
@@ -79,7 +79,7 @@
         <property name="geometry">
          <rect>
           <x>130</x>
-          <y>130</y>
+          <y>100</y>
           <width>241</width>
           <height>71</height>
          </rect>
@@ -134,7 +134,7 @@
         <property name="geometry">
          <rect>
           <x>130</x>
-          <y>210</y>
+          <y>180</y>
           <width>241</width>
           <height>91</height>
          </rect>
@@ -267,6 +267,47 @@
           <string>20</string>
          </property>
         </widget>
+       </widget>
+       <widget class="QLabel" name="label">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>270</y>
+          <width>111</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Koka dziļums (1-10)</string>
+        </property>
+       </widget>
+       <widget class="QSpinBox" name="spnDepth">
+        <property name="geometry">
+         <rect>
+          <x>280</x>
+          <y>280</y>
+          <width>41</width>
+          <height>25</height>
+         </rect>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>10</number>
+        </property>
+        <property name="value">
+         <number>7</number>
+        </property>
        </widget>
       </widget>
       <widget class="QWidget" name="pageMain">
@@ -422,14 +463,117 @@
        <widget class="QLabel" name="lblCurrentPlayer">
         <property name="geometry">
          <rect>
-          <x>350</x>
-          <y>40</y>
+          <x>80</x>
+          <y>60</y>
           <width>61</width>
           <height>16</height>
          </rect>
         </property>
         <property name="text">
          <string>Spēlētajs</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblTurn">
+        <property name="geometry">
+         <rect>
+          <x>80</x>
+          <y>40</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Gājiens:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblTurnTime">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>40</y>
+          <width>91</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Gājiena ilgums:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblTime">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>60</y>
+          <width>61</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Ilgums</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblNode">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>100</y>
+          <width>91</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Apmeklēto virsotņu skaits:</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblNodeCount">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>140</y>
+          <width>111</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblNodeEnd">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>170</y>
+          <width>121</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Kopējais apmeklēto virsotņu skaits:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lblNodeCountEnd">
+        <property name="geometry">
+         <rect>
+          <x>180</x>
+          <y>220</y>
+          <width>121</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </widget>
@@ -443,7 +587,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

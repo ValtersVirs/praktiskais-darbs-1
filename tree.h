@@ -13,38 +13,39 @@ using namespace std;
 
 class Node {
 private:
-    vector<Node*> parentNodes;
-    vector<Node*> childNodes;
-    State state;
-    int depth;
+    vector<Node*> parentNodes;  // parent nodes
+    vector<Node*> childNodes;   // child nodes
+    State state;                // state
+    int depth;                  // nodes depth
+    int value;                  // states heuristic value
 
 public:
     Node(State state) {
         this->state = state;
         this->depth = 0;
+        this->value = 0;
     }
 
     Node(Node* parentNode, State state, int depth) {
         this->parentNodes.push_back(parentNode);
         this->state = state;
         this->depth = depth;
+        this->value = 0;
     }
 
-
-    ~Node() {
-        for (Node* node : childNodes) {
-            delete node;
-        }
-    }
-
-    // adds child to node
-    Node* addChild(State state) {
+    // creates a new child node
+    Node* addNewChild(State state) {
         Node* childNode = new Node(this, state, depth + 1);
         childNodes.push_back(childNode);
         return childNode;
     }
 
-    // add parent to node
+    // adds an existing child node
+    void addChild(Node* child) {
+        childNodes.push_back(child);
+    }
+
+    // adds parent
     void addParent(Node* parent) {
         parentNodes.push_back(parent);
     }
@@ -53,6 +54,9 @@ public:
     vector<Node*> getParentNode() const { return parentNodes; }
     vector<Node*> getChildNodes() const { return childNodes; }
     int getDepth() const { return depth; }
+    int getValue() const { return value; }
+    void setValue(int value) { this->value = value; }
+
 };
 
 class Tree {
@@ -60,12 +64,17 @@ private:
     Node* rootNode;
 
 public:
+    Tree() {}
+
     Tree(State state) {
         rootNode = new Node(state);
     }
 
     ~Tree() {
-        delete rootNode;
+        vector<Node*> nodes = getAllNodes();
+        for (Node* node : nodes) {
+            delete node;
+        }
     }
 
     // generate tree, takes in tree depth as argument, if not given, generates full tree
@@ -76,14 +85,7 @@ public:
         Node* curNode;                 // currently looked at node
         int curDepth = 0;              // current depth
 
-        // statistic variables
-        int totalNodes = 1;
-        int nodeCount = 0;
-        int stateCount = 0;
-
         curLevel.push(rootNode);
-
-        clock_t start = clock();
 
         // iterate while there are nodes or until depth is reached
         while (!curLevel.empty() && (depth == -1 || curDepth < depth)) {
@@ -96,41 +98,25 @@ public:
                 auto result = nextLevel.find(state);
                 // if state not found in next level, create new node and add it to next level
                 if (result == nextLevel.end()) {
-                    nextLevel.emplace(state, curNode->addChild(state));
-                    totalNodes++;
+                    nextLevel.emplace(state, curNode->addNewChild(state));
                 }
-                // if state found in next level, add parent to its node
+                // if state found in next level, connect them
                 else {
                     result->second->addParent(curNode);
+                    curNode->addChild(result->second);
                 }
-                stateCount++;
             }
 
             // if current level completed, go to next level
             if (curLevel.empty()) {
                 for (const auto& pair : nextLevel) {
                     curLevel.push(pair.second);
-                    nodeCount++;
                 }
                 nextLevel.clear();
 
                 curDepth++;
-
-                /*
-                qDebug() << "Depth " << curDepth << " generated";
-                qDebug() << "\t" << totalNodes << " Total nodes";
-                qDebug() << "\t" << nodeCount << " Nodes generated";
-                qDebug() << "\t" << stateCount << " States created ";
-                */
-
-                nodeCount = 0;
-                stateCount = 0;
             }
         }
-        clock_t end = clock();
-        double duration = double(end - start) / CLOCKS_PER_SEC;
-
-        //qDebug() << "Tree generated " << duration;
     }
 
     // generates and returns all child states
