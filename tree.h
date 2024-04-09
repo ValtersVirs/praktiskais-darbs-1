@@ -11,6 +11,7 @@
 
 using namespace std;
 
+// tree node class
 class Node {
 private:
     vector<Node*> parentNodes;  // parent nodes
@@ -45,7 +46,7 @@ public:
         childNodes.push_back(child);
     }
 
-    // adds parent
+    // adds a parent
     void addParent(Node* parent) {
         parentNodes.push_back(parent);
     }
@@ -59,6 +60,7 @@ public:
 
 };
 
+// tree class
 class Tree {
 private:
     Node* rootNode;
@@ -87,12 +89,12 @@ public:
 
         curLevel.push(rootNode);
 
-        // iterate while there are nodes or until depth is reached
+        // iterate while there are nodes in current level or until depth is reached
         while (!curLevel.empty() && (depth == -1 || curDepth < depth)) {
             curNode = curLevel.front();
             curLevel.pop();
 
-            // generate current nodes possible child states
+            // generate current node's possible child states
             states = generateChildStates(curNode->getState());
             for (State state : states) {
                 auto result = nextLevel.find(state);
@@ -107,7 +109,7 @@ public:
                 }
             }
 
-            // if current level completed, go to next level
+            // if current level is completed, go to next level
             if (curLevel.empty()) {
                 for (const auto& pair : nextLevel) {
                     curLevel.push(pair.second);

@@ -6,13 +6,13 @@
 
 using namespace std;
 
+// game state class
 class State {
 private:
     int points, bank;
     map<int, int> numbers;  // map of numbers, key = number, value = count
 
 public:
-
     State() : points(0), bank(0) {
         numbers[1] = 0;
         numbers[2] = 0;
@@ -77,13 +77,14 @@ public:
     // returns states heuristic functions value
     // higher value is better
     int heuristicValue() {
-        int value = 0;  // default value
+        int value = 0;  // default value, if no criteria is met
 
         // is game winnable
         bool isWinnable =
             (isEven(points) && isEven(numbers[1] + numbers[3])) ||
             (!isEven(points) && !isEven(numbers[1] + numbers[3]));
 
+        // check for end states
         if (hasFinished()) {
             if (isWinnable) {
                 // win state
@@ -177,7 +178,7 @@ public:
         return tempNumbers;
     }
 
-    // returns only unique numbers
+    // returns only unique numbers in state
     vector<int> getUniqueNumbers() {
         vector<int> tempNumbers;
 
@@ -207,6 +208,7 @@ public:
         return false;
     }
 
+    // check if end state
     bool hasFinished() {
         for (const auto& pair : numbers) {
             if (pair.second > 0) {
@@ -217,7 +219,7 @@ public:
         return true;
     }
 
-    // compare operator
+    // compare operator, to compare states
     bool operator==(const State& state) const {
         return (
             this->points == state.points &&
@@ -226,7 +228,7 @@ public:
             );
     }
 
-    // less than operator
+    // less than operator, to compare states for map
     bool operator<(const State& state) const {
         if (points != state.points) {
             return this->points < state.points;

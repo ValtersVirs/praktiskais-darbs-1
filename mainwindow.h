@@ -34,17 +34,16 @@ private slots:
     void setLength(int);
     void changePlayer();
     void computerMove();
-    void computerState(int, bool);
 
 private:
     Ui::MainWindow *ui;
-    QThread *treeThread;
 
     int points, curIndex, curPlayer, depth, totalNodeCount;
     vector<int> numbers;
     State state;
     int firstPlayer, algorithmType, length;
 
+    // state that is shown on screen, which differs from inner state
     struct {
         int points, bank;
         vector<int> numbers;

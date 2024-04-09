@@ -8,7 +8,7 @@
 
 const int MAX = numeric_limits<int>::max();  // highest possible value
 const int MIN = numeric_limits<int>::min();  // lowest possible value
-int nodeCount;
+int nodeCount;  // node count used in minimax and alfa beta
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,8 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // initialize game
     initializeSettings();
 
+    // Qt event handlers
     connect(ui->btnStartGame, SIGNAL (clicked()), this, SLOT (startGame()));
     connect(ui->btnRemove, SIGNAL (clicked()), this, SLOT (actionRemove()));
     connect(ui->btnDivide, SIGNAL (clicked()), this, SLOT (actionDivide()));
@@ -33,9 +35,12 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+// sets initial settings
 void MainWindow::initializeSettings() {
+    // set default number row length
     setLength(15);
 
+    // set screen objects
     ui->lblWinner->setVisible(false);
     ui->btnStartGame->setVisible(true);
     ui->btnNewGame->setVisible(false);
@@ -45,21 +50,28 @@ void MainWindow::initializeSettings() {
     ui->radioMinimax->setChecked(true);
 }
 
+// starts a new game
 void MainWindow::startGame() {
+    // shownState is state shown on screen
     shownState.bank = 0;
     shownState.points = 0;
 
+    // generates new random numbers in rangge [1;4]
     srand(time(0));
     for (int i = 0; i < length; i++) {
         shownState.numbers.push_back(rand() % 4 + 1);
     }
 
+    // creates a new inner state
     state = State(shownState.numbers);
 
     nodeCount = 0;
     totalNodeCount = 0;
     curIndex = 0;
 
+    // first player
+    // 1 = user
+    // 2 = computer
     if (ui->radioUser->isChecked()) {
         firstPlayer = 1;
         ui->lblCurrentPlayer->setText(QString("Lietotājs"));
@@ -70,6 +82,9 @@ void MainWindow::startGame() {
 
     curPlayer = firstPlayer;
 
+    // which algorithm to use
+    // 1 = minimax
+    // 2 = alfa-beta
     if (ui->radioMinimax->isChecked()) {
         algorithmType = 1;
     } else {
@@ -78,6 +93,7 @@ void MainWindow::startGame() {
 
     depth = ui->spnDepth->value();
 
+    // set screen objects
     ui->stackedWidget->setCurrentWidget(ui->pageMain);
     ui->lblWinner->setVisible(false);
     ui->btnRemove->setVisible(true);
@@ -104,6 +120,7 @@ void MainWindow::startGame() {
     }
 }
 
+// updates state shown on screen
 void MainWindow::updateState() {
     if (curPlayer == 1) {
         ui->btnLeft->setDisabled(false);
@@ -125,6 +142,7 @@ void MainWindow::updateState() {
         curIndex = shownState.numbers.size() - 1;
     }
 
+    // numbers shown on screen
     QString numberString = "";
     for (int i = 0; i < shownState.numbers.size(); ++i) {
         if (curIndex == i) {
@@ -144,6 +162,7 @@ void MainWindow::updateState() {
     }
 }
 
+// sets end screen when game has ended
 void MainWindow::gameOver() {
     ui->btnRemove->setVisible(false);
     ui->btnDivide->setVisible(false);
@@ -182,6 +201,7 @@ void MainWindow::gameOver() {
     ui->lblWinner->setVisible(true);
 }
 
+// action when number is removed
 void MainWindow::actionRemove() {
     if (state.hasFinished() || curPlayer == 2) return;
 
@@ -196,6 +216,7 @@ void MainWindow::actionRemove() {
     changePlayer();
 }
 
+// action when number is divided
 void MainWindow::actionDivide() {
     if (state.hasFinished() || curPlayer == 2) return;
 
@@ -220,6 +241,7 @@ void MainWindow::actionDivide() {
     changePlayer();
 }
 
+// executes computer's moves
 void MainWindow::computerMove() {
     // set screen for computer move
     ui->btnLeft->setDisabled(true);
@@ -233,7 +255,6 @@ void MainWindow::computerMove() {
     }
     ui->lblNumbers->setText(numberString);
     ui->stackedWidget->repaint();
-    //qApp->processEvents();
 
     clock_t startTime, endTime;
 
@@ -251,6 +272,7 @@ void MainWindow::computerMove() {
     nodeCount = 0;
 
     startTime = clock();
+    // use minimax or alfa-beta
     if (algorithmType == 1) {
         optimalValue = minimax(tree.getRoot(), isMaxPlayer, depth);
     } else {
@@ -264,8 +286,9 @@ void MainWindow::computerMove() {
     totalNodeCount += nodeCount;
     State bestState;
 
-    // get next state
+    // finds next computer state
     for (Node* node : tree.getRoot()->getChildNodes()) {
+        // if child nodes value matches algorithms found value, state found
         if (node->getValue() == optimalValue) {
             bestState = node->getState();
             break;
@@ -293,7 +316,7 @@ void MainWindow::computerMove() {
     }
     state = bestState;
 
-    // find number position
+    // find number position on screen state
     int index = 0;
     for (int i = 0; i < shownState.numbers.size(); i++) {
         if (shownState.numbers[i] == actionNumber) {
@@ -341,8 +364,7 @@ void MainWindow::computerMove() {
     updateState();
 }
 
-void MainWindow::computerState(int number, bool option) {}
-
+// player moves to the left number
 void MainWindow::indexLeft() {
     if (curIndex > 0) {
         curIndex--;
@@ -350,6 +372,7 @@ void MainWindow::indexLeft() {
     updateState();
 }
 
+// player moves to the right number
 void MainWindow::indexRight() {
     if (curIndex < shownState.numbers.size() - 1) {
         curIndex++;
@@ -357,6 +380,7 @@ void MainWindow::indexRight() {
     updateState();
 }
 
+// sets number row length
 void MainWindow::setLength(int value) {
     length = value;
     QString text = "Virknes garums ";
@@ -364,6 +388,7 @@ void MainWindow::setLength(int value) {
     ui->lblLength->setText(text);
 }
 
+// change turn to next player
 void MainWindow::changePlayer() {
     curPlayer = curPlayer == 1 ? 2 : 1;
 
@@ -373,11 +398,13 @@ void MainWindow::changePlayer() {
         ui->lblCurrentPlayer->setText(QString("<font color='red'>Dators</font>"));
     }
 
+    // calls computers move if computers turn
     if (!state.hasFinished() && curPlayer == 2) {
         computerMove();
     }
 }
 
+// handle key presses
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (ui->stackedWidget->currentWidget() == ui->pageMain) {
         if (event->key() == Qt::Key_A) {
